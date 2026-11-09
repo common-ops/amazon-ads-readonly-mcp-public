@@ -1,0 +1,25 @@
+# Amazon Ads 読み取り専用MCP AI利用ガイド
+
+このサーバーは設定と保存された履歴を参照する。ルールの編集、承認、評価実行、入札変更、再取得、通知送信は提供しない。
+
+最初にlist_accessible_contextsで閲覧可能法人を確認する。search_targetsで対象を特定し、同名の場合は法人、キャンペーン、広告グループ、広告種別、対象IDを確認して利用者に選択してもらう。ASINやキーワード名だけで対象を決めない。
+
+get_effective_settingsは現在の保存設定と補正日程を返す。configured_for_targetは数値条件の一致や実行可能性を意味しない。優先順位、所有権、直近の再評価状態、実行時の外部状態を完全に再現するものではない。次回時刻はカレンダー上の予定で、反映完了予定ではない。
+
+get_change_historyの既定はas_ofまでの過去7日間、実行日時基準、executedのみ。失敗・承認待ち・不明を確認するときはtime_basis=generatedとstatusesを指定する。期間は開始を含み終了を含まない。応答のresolved_periodを説明し、JSTで表示する。
+
+変更履歴を表にするときは、日時、対象、変更前期待値、提案額、適用ルールIDと当時の条件、判定集計期間、根拠指標、実行結果、証跡を含める。当時名・当時版がNULLなら現在の名称で置き換えない。current_nameは現在名と明記する。rule.conditions/evidence.metrics_by_windowは当時の保存根拠で、現在のrule設定を用いて説明し直さない。
+
+bid.expected_before/proposed_afterは期待値と提案額。pre_read/post_readは実際の読取証跡が存在するときだけ入る。HTTP 200/207やexecutedだけで実読取確認済みと説明しない。receipt.levelとmissing_fieldsを確認する。現在の入札額を過去の反映後の値に代用しない。
+
+ROASはunitを確認する。ratioの1.5は150%。金額はcurrency/unitを付け、0、未記録、不明を区別する。複数のmetrics_by_windowを混ぜず、それぞれの期間・指標を示す。欠損する集計開始日を現在のlookbackから補わない。
+
+get_processing_statusはデータ取得・評価・反映・通知を別々に扱う。レポート作成COMPLETEDと取込完了は別で、imported_at=NULLだけで失敗や未取込を断定しない。source_coverageにsnapshot未収集とあれば未確認のまま伝える。法人全体のskip理由を個別対象の理由に読み替えない。unknownは成功にも失敗にも丸めない。
+
+本番データは専用の参照用DBへ定期同期される。as_of、data_updated_at、source_coverageの期間・capped・未収集を必ず確認する。候補生成日時で限定した収集では、期間外に生成され期間内に実行された記録が欠け得る。requested_period_covered=falseなら「取得できた記録」と説明し、全変更・全件とは断定しない。Amazon管理画面など外部で行った操作を網羅しない。
+
+next_cursorがある限り続きがある。最後まで取得するか、表示件数と続きがあることを明示する。同期でdataset_idが変わるとcursorは無効になるので先頭からやり直す。
+
+Cloudflare Accessで認証したメールを既存アカウントの閲覧権限に照合する。ドメイン許可だけで全法人の閲覧権限を与えるわけではない。認証・権限データが古い場合は参照を停止する。JWT、cookie、認証コード、接続用資格情報を回答・ログ・設定例に出さない。
+
+接続先・起動方法はREADME.mdを参照する。GrokのローカルCLIはstdioブリッジを利用できる。grok.com/ChatGPT等のクラウドコネクタへこのCloudflare Access認証をそのままOAuthとして登録できるとは扱わない。別の認証接続検証が必要。

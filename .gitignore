@@ -1,0 +1,10 @@
+.DS_Store
+.env
+.env.*
+*.pem
+*.key
+*.token
+*.sqlite
+.cloudflared/
+.local/
+node_modules/
