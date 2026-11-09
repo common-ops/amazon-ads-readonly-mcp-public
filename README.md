@@ -1,6 +1,6 @@
 # Amazon Ads Auto Review — 読み取り専用MCPクライアント
 
-2026-11-10更新。接続ブリッジv0.3.0の公開配布です。AIからAmazon Ads Auto Reviewの保存済み設定・履歴を参照できます。
+2026-11-10更新。接続ブリッジv0.4.0の公開配布です。AIからAmazon Ads Auto Reviewの保存済み設定・履歴を参照できます。
 
 **このリポジトリは公開されていますが、実データの参照には管理者が許可したアカウントでのCloudflare認証と閲覧権限が必要です。** 公開コードをダウンロードしても利用権限は付与されません。
 
@@ -15,6 +15,7 @@ https://github.com/common-ops/amazon-ads-readonly-mcp-public
 Codexではrequired=falseを維持し、最初は専用の検証プロジェクトだけに登録してください。
 既存MCPや全体設定を一括で変更せず、認証が必要になったら本人操作へ引き渡してください。
 認証コード、token、cookie、秘密鍵をチャット・ログ・リポジトリへ出さないでください。
+利用履歴と任意の質問文の保存条件を利用者に説明してください。
 設定後は機能一覧の取得と、本人認証後のlist_accessible_contextsで接続を確認してください。
 ```
 
@@ -37,7 +38,7 @@ Grok Botでは、手元のPCではなくBotのクラウドPC上に配置・設�
 
 ### 1. クライアントを取得
 
-[Release v0.3.0](https://github.com/common-ops/amazon-ads-readonly-mcp-public/releases/tag/v0.3.0)のAssetsから `amazonads-readonly-mcp-client-public-v0.3.0.zip` をダウンロード・展開するか、次のコマンドで取得します。
+[Release v0.4.0](https://github.com/common-ops/amazon-ads-readonly-mcp-public/releases/tag/v0.4.0)のAssetsから `amazonads-readonly-mcp-client-public-v0.4.0.zip` をダウンロード・展開するか、次のコマンドで取得します。
 
 ```sh
 git clone https://github.com/common-ops/amazon-ads-readonly-mcp-public.git
@@ -75,6 +76,16 @@ grok.comやChatGPTのURL型クラウドコネクタは別方式です。このCl
 最初に機能一覧を取得します。次に本人認証済みの状態で `list_accessible_contexts` を呼び、閲覧可能な法人が返ることを確認します。以後は検索で対象を特定してから、設定・履歴・処理状況を参照します。
 
 **初期化や機能一覧の成功は、本番の本人認証成功を意味しません。** 実データの参照成功を別に確認してください。AI向けガイドは[AI_README.md](AI_README.md)とMCPリソース `amazonads://guide/ai-readme`で参照できます。
+
+## 利用履歴と質問文の保存
+
+本番サーバーは、認証済みユーザー・日時・利用機能・参照条件・処理結果・所要時間を、管理者向けに記録します。広告データの応答本文や会話全体は記録しません。他の利用者の履歴を読むMCP機能はありません。
+
+v0.4.0では各ツールに任意の `user_question` を追加しました。AIが関連する質問原文を取得でき、送信してよい場合にだけ付けます（1〜2000文字）。原文不明・長文・秘密情報を含む場合や、利用者が質問文の保存を望まない場合は省略します。質問文を省略しても参照機能は使え、参照条件の利用履歴は残ります。
+
+質問文は「AIから送られた文面」として保存し、実際の原文との一致や全質問の捕捉は保証しません。MCPを使わない会話や導入前の質問は取得できません。認証情報・パスワード・鍵などを質問文へ含めないでください。送信ルールは[AI_README.md](AI_README.md)に記載しています。
+
+旧版でも質問文なしの参照は継続できます。質問文の送信に対応するには、実際に起動しているクライアントのフォルダをこの版へ更新し、MCPを再接続して機能一覧を取り直してください。ログ障害時も参照を継続する構成なので、利用履歴は完全な監査証跡ではありません。
 
 ## 認証切れ・通信エラー
 

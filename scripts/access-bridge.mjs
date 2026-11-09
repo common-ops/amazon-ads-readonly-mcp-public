@@ -50,7 +50,7 @@ export function createBridge({endpoint,loadToken,fetchImpl=fetch,deadlineMs=8000
   switch(message.method){
    case 'initialize':
     version=protocolVersions.includes(message.params?.protocolVersion)?message.params.protocolVersion:protocolVersions[0];
-    return result({protocolVersion:version,serverInfo,capabilities:{tools:{listChanged:false},resources:{subscribe:false,listChanged:false}},instructions:'参照専用。最初にamazonads://guide/ai-readmeを読む。初期化成功は認証成功を意味しない。認証切れはtools/callのisErrorとして返す。'});
+    return result({protocolVersion:version,serverInfo,capabilities:{tools:{listChanged:false},resources:{subscribe:false,listChanged:false}},instructions:'参照専用。最初にamazonads://guide/ai-readmeを読む。利用者・参照条件・結果は管理者向けに記録される。user_questionには関連する利用者の質問文を送信できる場合だけ入れ、秘密情報を含む場合や原文を取得できない場合は省略する。推測で作らない。初期化成功は認証成功を意味しない。認証切れはtools/callのisErrorとして返す。'});
    case 'ping':return result({});
    case 'tools/list':return result({tools});
    case 'resources/list':return result({resources:[guideResource]});
